@@ -4,60 +4,66 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import {
-	applyThemeToDocument,
-	getStoredTheme,
-	setTheme,
+    applyThemeToDocument,
+    getStoredTheme,
+    setTheme,
 } from "@utils/setting-utils.ts";
 import { onMount } from "svelte";
 import type { LIGHT_DARK_MODE } from "@/types/config.ts";
+
+// --- SVELTE 5 RUNES FIX START ---
+// 在 Runes 模式下使用 $props() 来定义组件属性。
+// 这解决了 "Cannot use export let in runes mode" 的错误。
+// 同时，这满足了 Astro 对组件必须有 props 定义的要求，解决了 Navbar.astro 的 ts(2322) 错误。
+const props = $props<{ className?: string }>();
+// --- SVELTE 5 RUNES FIX END ---
 
 const seq: LIGHT_DARK_MODE[] = [LIGHT_MODE, DARK_MODE, AUTO_MODE];
 let mode: LIGHT_DARK_MODE = $state(AUTO_MODE);
 
 onMount(() => {
-	mode = getStoredTheme();
-	const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
-	const changeThemeWhenSchemeChanged: Parameters<
-		typeof darkModePreference.addEventListener<"change">
-	>[1] = (_e) => {
-		applyThemeToDocument(mode);
-	};
-	darkModePreference.addEventListener("change", changeThemeWhenSchemeChanged);
-	return () => {
-		darkModePreference.removeEventListener(
-			"change",
-			changeThemeWhenSchemeChanged,
-		);
-	};
+    mode = getStoredTheme();
+    const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
+    const changeThemeWhenSchemeChanged: Parameters<
+        typeof darkModePreference.addEventListener<"change">
+    >[1] = (_e) => {
+        applyThemeToDocument(mode);
+    };
+    darkModePreference.addEventListener("change", changeThemeWhenSchemeChanged);
+    return () => {
+        darkModePreference.removeEventListener(
+            "change",
+            changeThemeWhenSchemeChanged,
+        );
+    };
 });
 
 function switchScheme(newMode: LIGHT_DARK_MODE) {
-	mode = newMode;
-	setTheme(newMode);
+    mode = newMode;
+    setTheme(newMode);
 }
 
 function toggleScheme() {
-	let i = 0;
-	for (; i < seq.length; i++) {
-		if (seq[i] === mode) {
-			break;
-		}
-	}
-	switchScheme(seq[(i + 1) % seq.length]);
+    let i = 0;
+    for (; i < seq.length; i++) {
+        if (seq[i] === mode) {
+            break;
+        }
+    }
+    switchScheme(seq[(i + 1) % seq.length]);
 }
 
 function showPanel() {
-	const panel = document.querySelector("#light-dark-panel");
-	panel.classList.remove("float-panel-closed");
+    const panel = document.querySelector("#light-dark-panel");
+    panel.classList.remove("float-panel-closed");
 }
 
 function hidePanel() {
-	const panel = document.querySelector("#light-dark-panel");
-	panel.classList.add("float-panel-closed");
+    const panel = document.querySelector("#light-dark-panel");
+    panel.classList.add("float-panel-closed");
 }
 </script>
 
-<!-- z-50 make the panel higher than other float panels -->
 <div class="relative z-50" role="menu" tabindex="-1" onmouseleave={hidePanel}>
     <button aria-label="Light/Dark Mode" role="menuitem" class="relative btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="scheme-switch" onclick={toggleScheme} onmouseenter={showPanel}>
         <div class="absolute" class:opacity-0={mode !== LIGHT_MODE}>
