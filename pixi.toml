@@ -1,0 +1,11 @@
+[workspace]
+authors = ["__reiky__ <32432650+Reiky-REI@users.noreply.github.com>"]
+channels = ["conda-forge"]
+name = "reiky@blogs"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+pnpm = ">=10.26.2,<11"
